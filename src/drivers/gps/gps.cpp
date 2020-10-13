@@ -1203,25 +1203,31 @@ GPS *GPS::instantiate(int argc, char *argv[], Instance instance)
 			}
 			break;
 
-		case 'p':
-			if (!strcmp(myoptarg, "ubx")) {
+		case 'p': {
+			int protocol = -1;
+			if (!strncmp(myoptarg, "p:", 2) && px4_get_parameter_value(myoptarg, protocol) != 0) {
+				PX4_ERR("protocol parsing failed");
+				error_flag = true;
+			}
+
+			if (!strcmp(myoptarg, "ubx") || protocol == 1) {
 				mode = GPS_DRIVER_MODE_UBX;
 
-			} else if (!strcmp(myoptarg, "mtk")) {
+			} else if (!strcmp(myoptarg, "mtk") || protocol == 2) {
 				mode = GPS_DRIVER_MODE_MTK;
 
-			} else if (!strcmp(myoptarg, "ash")) {
+			} else if (!strcmp(myoptarg, "ash") || protocol == 3) {
 				mode = GPS_DRIVER_MODE_ASHTECH;
 
-			} else if (!strcmp(myoptarg, "eml")) {
+			} else if (!strcmp(myoptarg, "eml") || protocol == 4) {
 				mode = GPS_DRIVER_MODE_EMLIDREACH;
 
-			} else {
+			} else if (protocol != 0) {
 				PX4_ERR("unknown interface: %s", myoptarg);
 				error_flag = true;
 			}
 			break;
-
+		}
 		case '?':
 			error_flag = true;
 			break;
